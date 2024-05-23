@@ -37,13 +37,13 @@ const App: React.FC = () => {
 
   return (
     <div>
-      <h1>Upload an image</h1>
+      <h1>Upload an image!</h1>
       <input
         type="file"
         onChange={handleImageChange}
       />
       <button onClick={handleSubmit}>send</button>
-      {response && <p>Ответ: {response}</p>}
+      {response && <p>answer: {response}</p>}
     </div>
   );
 };
