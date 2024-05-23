@@ -20,6 +20,7 @@ const App: React.FC = () => {
 
   const handleSubmit = async () => {
     if (image) {
+      console.log(image);
       const formData = new FormData();
       formData.append('file', image);
 
