@@ -5,7 +5,7 @@ import axios from 'axios';
 interface Headers {
   [key: string]: string;
 }
-const SERVERS_URL = 'http://localhost:3000//upload';
+const SERVERS_URL = 'http://localhost:3000/upload';
 const headers: Headers = { 'Content-Type': 'multipart/form-data' };
 
 const App: React.FC = () => {
