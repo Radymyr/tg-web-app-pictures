@@ -23,7 +23,8 @@ body {
   box-shadow: 0 1px 0 var(--tg-theme-text-color);
 }
 
-.title {
+.title,
+.text {
   color: var(--tg-theme-text-color);
   text-align: center;
 }

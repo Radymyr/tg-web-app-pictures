@@ -6,6 +6,7 @@ import ImageUpload from './components/ImageUpload/ImageUpload';
 import TextInput from './components/TextInput/TextInput';
 import ResponseMessage from './components/ResponseMessage/ResponseMessage';
 import { WebApp } from './utils/Initialize';
+import spinner from './assets/icons/spinner.svg';
 
 interface Headers {
   [key: string]: string;
@@ -21,6 +22,7 @@ const App: React.FC = () => {
   const [text, setText] = useState<string>('');
   const [response, setResponse] = useState<string | null>(null);
   const [fileKey, setFileKey] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const isImageFile = (file: File) => {
     const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
@@ -34,8 +36,11 @@ const App: React.FC = () => {
 
       if (isImageFile(selectedFile)) {
         setImage(selectedFile);
+        setText('');
         setResponse('');
       } else {
+        setImage(null);
+        setText('');
         setResponse('Please upload a valid image file (JPEG, PNG, GIF).');
       }
 
@@ -52,10 +57,13 @@ const App: React.FC = () => {
     WebApp.MainButton.setParams({ is_visible: true, is_active: true });
 
     const handleSubmit = async () => {
-      if (image && text) {
+      const { id } = WebApp.initDataUnsafe.user;
+      if (image && text && id) {
+        setIsLoading(true);
         const formData = new FormData();
         formData.append('photo', image);
         formData.append('text', text.trim());
+        formData.append('userId', id.toString());
 
         try {
           const res = await axios.post(SERVERS_URL, formData, { headers });
@@ -67,6 +75,8 @@ const App: React.FC = () => {
         } catch (err) {
           console.error(err);
           setResponse('An error occurred while analyzing the image.');
+        } finally {
+          setIsLoading(false);
         }
       } else {
         setResponse('Please provide both an image and text.');
@@ -98,17 +108,24 @@ const App: React.FC = () => {
       <header className="header">
         <h1 className="title">Upload an image</h1>
       </header>
+      <p className="text">Valid image file (JPEG, PNG, GIF)</p>
       <ImageUpload
         onChange={handleImageChange}
         key={fileKey}
       />
       {response && <ResponseMessage message={response} />}
-      {image && (
-        <TextInput
-          value={text}
-          onChange={handleTextChange}
-        />
-      )}
+      {image &&
+        (isLoading ? (
+          <img
+            src={spinner}
+            alt="Loading..."
+          />
+        ) : (
+          <TextInput
+            value={text}
+            onChange={handleTextChange}
+          />
+        ))}
     </div>
   );
 };
