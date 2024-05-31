@@ -12,7 +12,7 @@ interface Headers {
   [key: string]: string;
 }
 
-const SERVERS_URL = 'http://localhost:3000/upload';
+const SERVERS_URL = 'https://361a-46-119-18-52.ngrok-free.app';
 const headers: Headers = { 'Content-Type': 'multipart/form-data' };
 
 const App: React.FC = () => {
