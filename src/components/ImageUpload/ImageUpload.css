@@ -1,0 +1,17 @@
+.image-input-wrapper {
+  display: block;
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  background: url('../../assets/images/download.svg') center/cover;
+  margin: 20px 0;
+  cursor: pointer;
+}
+
+.image-input-wrapper:hover {
+  opacity: 0.8;
+}
+
+.image-input-wrapper input {
+  display: none;
+}

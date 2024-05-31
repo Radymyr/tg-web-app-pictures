@@ -1,0 +1,16 @@
+.text-label {
+  color: (--tg-theme-text-color);
+}
+
+.text-input {
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid var(--tg-theme-hint-color);
+  border-radius: 4px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.text-input:hover {
+  border-color: var(--tg-theme-link-color);
+}
