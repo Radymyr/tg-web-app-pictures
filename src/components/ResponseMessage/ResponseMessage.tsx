@@ -6,7 +6,7 @@ interface ResponseMessageProps {
 }
 
 const ResponseMessage: React.FC<ResponseMessageProps> = ({ message }) => {
-  return <p>{message}</p>;
+  return <p className="response">{message}</p>;
 };
 
 export default ResponseMessage;
