@@ -23,3 +23,7 @@ export const showMainButton = () => {
 export const hideMainButton = () => {
   WebApp.MainButton.hide();
 };
+
+export const getUserData = () => {
+  return WebApp.initDataUnsafe.user;
+};
