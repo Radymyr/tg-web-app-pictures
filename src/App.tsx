@@ -20,12 +20,16 @@ import {
   readyWebApp,
   setupMainButton,
   showMainButton,
-  unSetupMainButton,
+  clearMainButtonHandler,
+  setMainButtonHandler,
+  disableMainButton,
+  enableMainButton,
 } from './utils/webApp';
 
 const App: React.FC = () => {
   useEffect(() => {
     readyWebApp();
+    setupMainButton();
     hideMainButton();
   }, []);
 
@@ -39,7 +43,6 @@ const App: React.FC = () => {
     (e) => {
       if (e.target.files && e.target.files[0]) {
         const selectedFile = e.target.files[0];
-        console.log('selectedFile:', selectedFile);
 
         if (isImageFile(selectedFile)) {
           setImage(selectedFile);
@@ -63,6 +66,8 @@ const App: React.FC = () => {
 
       if (value.trim()) {
         showMainButton();
+      } else {
+        hideMainButton();
       }
     },
     []
@@ -76,6 +81,7 @@ const App: React.FC = () => {
       const data = serializeUploadFile(image, text, id);
 
       try {
+        disableMainButton();
         const res = await uploadFile(data);
         setResponse(res.data.description);
         setImage(null);
@@ -85,6 +91,7 @@ const App: React.FC = () => {
         setResponse('An error occurred while analyzing the image.');
       } finally {
         setIsLoading(false);
+        enableMainButton();
       }
     } else {
       setResponse('Please provide both an image and text.');
@@ -102,9 +109,9 @@ const App: React.FC = () => {
   );
 
   useEffect(() => {
-    setupMainButton(collectAndSendData);
+    setMainButtonHandler(collectAndSendData);
     return () => {
-      unSetupMainButton(collectAndSendData);
+      clearMainButtonHandler(collectAndSendData);
     };
   }, [collectAndSendData]);
 

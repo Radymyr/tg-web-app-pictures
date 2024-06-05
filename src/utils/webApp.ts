@@ -6,13 +6,26 @@ export const readyWebApp = () => {
   WebApp.ready();
 };
 
-export const setupMainButton = (callback: MainButtonCallback) => {
+export const setupMainButton = () => {
   WebApp.MainButton.setText('Submit');
   WebApp.MainButton.setParams({ is_visible: true, is_active: true });
+};
+
+export const setMainButtonHandler = (callback: MainButtonCallback) => {
   WebApp.MainButton.onClick(callback);
 };
 
-export const unSetupMainButton = (callback: MainButtonCallback) => {
+export const disableMainButton = () => {
+  WebApp.MainButton.showProgress();
+  WebApp.MainButton.setParams({ color: '#eeeeee' });
+};
+
+export const enableMainButton = () => {
+  WebApp.MainButton.hideProgress();
+  WebApp.MainButton.setParams({ color: WebApp.themeParams.button_color });
+};
+
+export const clearMainButtonHandler = (callback: MainButtonCallback) => {
   WebApp.MainButton.offClick(callback);
 };
 
