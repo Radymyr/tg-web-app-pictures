@@ -4,19 +4,27 @@ import React, {
   useState,
   useCallback,
   FormEventHandler,
+  ChangeEventHandler,
 } from 'react';
 
 import { ImageUpload } from './components/ImageUpload';
 import TextInput from './components/TextInput/TextInput';
 import ResponseMessage from './components/ResponseMessage/ResponseMessage';
-import { WebApp } from './utils/Initialize';
 import spinner from './assets/icons/spinner.svg';
 import { isImageFile } from './utils/file';
 import { serializeUploadFile } from './utils/serializers';
 import { uploadFile } from './api/files';
+import {
+  getUserData,
+  hideMainButton,
+  readyWebApp,
+  setupMainButton,
+  showMainButton,
+  unSetupMainButton,
+} from './utils/webApp';
 
 const App: React.FC = () => {
-  useEffect(() => WebApp.ready(), []);
+  useEffect(readyWebApp, []);
 
   const [image, setImage] = useState<File | null>(null);
   const [text, setText] = useState<string>('');
@@ -24,8 +32,8 @@ const App: React.FC = () => {
   const [fileKey, setFileKey] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleImageChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (e) => {
       if (e.target.files && e.target.files[0]) {
         const selectedFile = e.target.files[0];
         console.log('selectedFile:', selectedFile);
@@ -39,7 +47,7 @@ const App: React.FC = () => {
           setText('');
           setResponse('Please upload a valid image file (JPEG, PNG, GIF).');
         }
-
+        hideMainButton();
         setFileKey((prevKey) => prevKey + 1);
       }
     },
@@ -47,14 +55,18 @@ const App: React.FC = () => {
   );
 
   const handleTextChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setText(e.target.value);
+    ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
+      setText(value);
+
+      if (value.trim()) {
+        showMainButton();
+      }
     },
     []
   );
 
   const collectAndSendData = useCallback(async () => {
-    const { id } = WebApp.initDataUnsafe.user;
+    const { id } = getUserData();
 
     if (image && text && id) {
       setIsLoading(true);
@@ -63,10 +75,8 @@ const App: React.FC = () => {
       try {
         const res = await uploadFile(data);
         setResponse(res.data.description);
-        if (res.status === 200) {
-          setImage(null);
-          setText('');
-        }
+        setImage(null);
+        setText('');
       } catch (err) {
         console.error(err);
         setResponse('An error occurred while analyzing the image.');
@@ -76,7 +86,7 @@ const App: React.FC = () => {
     } else {
       setResponse('Please provide both an image and text.');
     }
-    WebApp.MainButton.hide();
+    hideMainButton();
   }, [image, text]);
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = useCallback(
@@ -89,23 +99,11 @@ const App: React.FC = () => {
   );
 
   useEffect(() => {
-    WebApp.MainButton.setText('Submit');
-    WebApp.MainButton.setParams({ is_visible: true, is_active: true });
-
-    WebApp.MainButton.onClick(collectAndSendData);
-
+    setupMainButton(collectAndSendData);
     return () => {
-      WebApp.MainButton.offClick(collectAndSendData);
+      unSetupMainButton(collectAndSendData);
     };
   }, [collectAndSendData]);
-
-  useEffect(() => {
-    if (!image || !text.trim()) {
-      WebApp.MainButton.hide();
-    } else {
-      WebApp.MainButton.show();
-    }
-  }, [image, text]);
 
   return (
     <form
