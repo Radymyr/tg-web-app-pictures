@@ -1,6 +1,3 @@
-### README.md
-
-````markdown
 # TG Web App Pictures
 
 TG Web App Pictures is an application that allows users to upload an image and ask a related question via a Telegram WebApp. The image and question are sent to a server, which forwards the image to OpenAI for description generation. The response is then returned to the Telegram user who requested it.
@@ -27,7 +24,6 @@ Follow these instructions to set up and run the project locally.
    git clone https://github.com/Radymyr/tg-web-app-pictures.git
    cd tg-web-app-pictures
    ```
-````
 
 2. Install the dependencies:
 
