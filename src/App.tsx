@@ -1,19 +1,19 @@
 import './App.css';
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  FormEventHandler,
+} from 'react';
 
-import ImageUpload from './components/ImageUpload/ImageUpload';
+import { ImageUpload } from './components/ImageUpload';
 import TextInput from './components/TextInput/TextInput';
 import ResponseMessage from './components/ResponseMessage/ResponseMessage';
 import { WebApp } from './utils/Initialize';
 import spinner from './assets/icons/spinner.svg';
-
-interface Headers {
-  [key: string]: string;
-}
-
-const SERVERS_URL = 'https://361a-46-119-18-52.ngrok-free.app/upload';
-const headers: Headers = { 'Content-Type': 'multipart/form-data' };
+import { isImageFile } from './utils/file';
+import { serializeUploadFile } from './utils/serializers';
+import { uploadFile } from './api/files';
 
 const App: React.FC = () => {
   useEffect(() => WebApp.ready(), []);
@@ -24,76 +24,80 @@ const App: React.FC = () => {
   const [fileKey, setFileKey] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const isImageFile = (file: File) => {
-    const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    return acceptedImageTypes.includes(file.type);
-  };
+  const handleImageChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files[0]) {
+        const selectedFile = e.target.files[0];
+        console.log('selectedFile:', selectedFile);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      console.log('selectedFile:', selectedFile);
+        if (isImageFile(selectedFile)) {
+          setImage(selectedFile);
+          setText('');
+          setResponse('');
+        } else {
+          setImage(null);
+          setText('');
+          setResponse('Please upload a valid image file (JPEG, PNG, GIF).');
+        }
 
-      if (isImageFile(selectedFile)) {
-        setImage(selectedFile);
-        setText('');
-        setResponse('');
-      } else {
-        setImage(null);
-        setText('');
-        setResponse('Please upload a valid image file (JPEG, PNG, GIF).');
+        setFileKey((prevKey) => prevKey + 1);
       }
+    },
+    []
+  );
 
-      setFileKey((prevKey) => prevKey + 1);
+  const handleTextChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setText(e.target.value);
+    },
+    []
+  );
+
+  const collectAndSendData = useCallback(async () => {
+    const { id } = WebApp.initDataUnsafe.user;
+
+    if (image && text && id) {
+      setIsLoading(true);
+      const data = serializeUploadFile(image, text, id);
+
+      try {
+        const res = await uploadFile(data);
+        setResponse(res.data.description);
+        if (res.status === 200) {
+          setImage(null);
+          setText('');
+        }
+      } catch (err) {
+        console.error(err);
+        setResponse('An error occurred while analyzing the image.');
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setResponse('Please provide both an image and text.');
     }
-  };
+    WebApp.MainButton.hide();
+  }, [image, text]);
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setText(e.target.value);
-  };
+  const handleSubmit: FormEventHandler<HTMLFormElement> = useCallback(
+    async (e) => {
+      e.preventDefault();
+
+      await collectAndSendData();
+    },
+    [collectAndSendData]
+  );
 
   useEffect(() => {
     WebApp.MainButton.setText('Submit');
     WebApp.MainButton.setParams({ is_visible: true, is_active: true });
 
-    const handleSubmit = async () => {
-      const { id } = WebApp.initDataUnsafe.user;
-      if (image && text && id) {
-        setIsLoading(true);
-        const formData = new FormData();
-        formData.append('photo', image);
-        formData.append('text', text.trim());
-        formData.append('userId', id.toString());
-
-        try {
-          const res = await axios.post(SERVERS_URL, formData, { headers });
-          setResponse(res.data.description);
-          if (res.status === 200) {
-            setImage(null);
-            setText('');
-          }
-        } catch (err) {
-          console.error(err);
-          setResponse('An error occurred while analyzing the image.');
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        setResponse('Please provide both an image and text.');
-      }
-    };
-
-    const handleClick = () => {
-      handleSubmit();
-      WebApp.MainButton.hide();
-    };
-
-    WebApp.MainButton.onClick(handleClick);
+    WebApp.MainButton.onClick(collectAndSendData);
 
     return () => {
-      WebApp.MainButton.offClick(handleClick);
+      WebApp.MainButton.offClick(collectAndSendData);
     };
-  }, [image, text]);
+  }, [collectAndSendData]);
 
   useEffect(() => {
     if (!image || !text.trim()) {
@@ -104,9 +108,13 @@ const App: React.FC = () => {
   }, [image, text]);
 
   return (
-    <div className="container">
+    <form
+      action=""
+      onSubmit={handleSubmit}
+      className="container"
+    >
       <header className="header">
-        <h1 className="title">Upload an image</h1>
+        <h1 className="title">Upload your image</h1>
       </header>
       <p className="text">Valid image file (JPEG, PNG, GIF)</p>
       <ImageUpload
@@ -124,9 +132,12 @@ const App: React.FC = () => {
           <TextInput
             value={text}
             onChange={handleTextChange}
+            label="Your question about the photo"
+            placeholder="Enter your text here"
+            inputId="text-input"
           />
         ))}
-    </div>
+    </form>
   );
 };
 
