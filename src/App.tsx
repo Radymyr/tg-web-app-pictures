@@ -24,7 +24,10 @@ import {
 } from './utils/webApp';
 
 const App: React.FC = () => {
-  useEffect(readyWebApp, []);
+  useEffect(() => {
+    readyWebApp();
+    hideMainButton();
+  }, []);
 
   const [image, setImage] = useState<File | null>(null);
   const [text, setText] = useState<string>('');
