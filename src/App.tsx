@@ -88,7 +88,9 @@ const App: React.FC = () => {
         setText('');
       } catch (err) {
         console.error(err);
-        setResponse('An error occurred while analyzing the image.');
+        setResponse(
+          'An error occurred while analyzing the image or no permission.'
+        );
       } finally {
         setIsLoading(false);
         enableMainButton();
