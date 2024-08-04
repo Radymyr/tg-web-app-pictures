@@ -51,7 +51,9 @@ const App: React.FC = () => {
         } else {
           setImage(null);
           setText('');
-          setResponse('Please upload a valid image file (JPEG, PNG, GIF).');
+          setResponse(
+            'Please upload a valid image file (JPEG, PNG, WEBP, GIF,).'
+          );
         }
         hideMainButton();
         setFileKey((prevKey) => prevKey + 1);
