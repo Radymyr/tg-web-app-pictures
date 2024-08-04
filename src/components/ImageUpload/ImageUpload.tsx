@@ -12,6 +12,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ onChange }) => {
         accept="image/png, image/jpeg"
         type="file"
         onChange={onChange}
+        capture="environment"
       />
     </label>
   );
