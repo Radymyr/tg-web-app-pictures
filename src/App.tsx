@@ -85,7 +85,7 @@ const App: React.FC = () => {
       try {
         disableMainButton();
         const res = await uploadFile(data);
-        setResponse(res.data.description);
+        setResponse(res.data.description + ` type: ${image.type}`);
         setImage(null);
         setText('');
       } catch (err) {
@@ -128,7 +128,7 @@ const App: React.FC = () => {
       <header className="header">
         <h1 className="title">Upload your image</h1>
       </header>
-      <p className="text">Valid image file (JPEG, PNG, GIF)</p>
+      <p className="text">Valid image file (JPEG, PNG, GIF, WEBP)</p>
       <ImageUpload
         onChange={handleImageChange}
         key={fileKey}
